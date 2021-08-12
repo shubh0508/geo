@@ -316,6 +316,11 @@ func (c *coverer) coveringInternal(region Region) {
 			cand.terminal = true
 			c.addCandidate(cand)
 		}
+		
+		if c.pq.Len() > 1e5 {
+			c.result = CellUnion{}
+			break
+		}
 	}
 
 	c.pq.Reset()
