@@ -73,10 +73,11 @@ import (
 // algorithm may spend a lot of time subdividing cells all the way to leaf
 // level to try to find contained cells.
 type RegionCoverer struct {
-	MinLevel int // the minimum cell level to be used.
-	MaxLevel int // the maximum cell level to be used.
-	LevelMod int // the LevelMod to be used.
-	MaxCells int // the maximum desired number of cells in the approximation.
+	MinLevel             int // the minimum cell level to be used.
+	MaxLevel             int // the maximum cell level to be used.
+	LevelMod             int // the LevelMod to be used.
+	MaxCells             int // the maximum desired number of cells in the approximation.
+	MaxIntermediateCells int // the maximum number of intermediate cells allowed in coverer priority queue
 }
 
 // NewRegionCoverer returns a region coverer with the appropriate defaults.
@@ -98,6 +99,7 @@ type coverer struct {
 	result           CellUnion
 	pq               priorityQueue
 	interiorCovering bool
+	maxPQCells       int // the maximum number of cells allowed in pq while getting the interior convering for a polygon
 }
 
 type candidate struct {
@@ -316,8 +318,8 @@ func (c *coverer) coveringInternal(region Region) {
 			cand.terminal = true
 			c.addCandidate(cand)
 		}
-		
-		if c.pq.Len() > 1e5 {
+
+		if c.maxPQCells != 0 && c.pq.Len() > c.maxPQCells {
 			c.result = CellUnion{}
 			break
 		}
@@ -341,10 +343,11 @@ func (c *coverer) coveringInternal(region Region) {
 // newCoverer returns an instance of coverer.
 func (rc *RegionCoverer) newCoverer() *coverer {
 	return &coverer{
-		minLevel: maxInt(0, minInt(maxLevel, rc.MinLevel)),
-		maxLevel: maxInt(0, minInt(maxLevel, rc.MaxLevel)),
-		levelMod: maxInt(1, minInt(3, rc.LevelMod)),
-		maxCells: rc.MaxCells,
+		minLevel:   maxInt(0, minInt(maxLevel, rc.MinLevel)),
+		maxLevel:   maxInt(0, minInt(maxLevel, rc.MaxLevel)),
+		levelMod:   maxInt(1, minInt(3, rc.LevelMod)),
+		maxCells:   rc.MaxCells,
+		maxPQCells: rc.MaxIntermediateCells,
 	}
 }
 

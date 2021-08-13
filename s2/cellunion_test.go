@@ -910,9 +910,10 @@ func TestCellUnionExpand(t *testing.T) {
 		// Generate a covering for the original cap, and measure the maximum
 		// distance from the cap center to any point in the covering.
 		coverer := &RegionCoverer{
-			MaxLevel: maxLevel,
-			MaxCells: 1 + skewedInt(10),
-			LevelMod: 1,
+			MaxLevel:             maxLevel,
+			MaxCells:             1 + skewedInt(10),
+			LevelMod:             1,
+			MaxIntermediateCells: 1e5, // for dh polygon converers, 0 by default for other use cases
 		}
 		covering := coverer.CellUnion(rndCap)
 		checkCellUnionCovering(t, rndCap, covering, true, 0)
